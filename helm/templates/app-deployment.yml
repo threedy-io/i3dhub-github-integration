@@ -1,0 +1,55 @@
+{{ if .Values.app.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment 
+metadata:
+  name: i3dhub-github-app 
+  namespace : {{ .Release.namespace }} 
+spec:
+  replicas: 1                 
+  selector:
+    matchLabels:
+      app: i3dhub-github-app        
+  template:                      
+    metadata:
+      labels:                    
+        app: i3dhub-github-app
+    spec:                        
+      containers:
+      - name: i3dhub-github-app
+        image: i3dhub-github-app:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 3000
+            name: app  
+        env:
+          - name: "REACT_APP_PROXY_URL"
+            value: {{ .Values.app.authProxy.url }}
+          - name: "REACT_APP_URl_HUB"
+            value: {{ .Values.app.hubURL}}  
+          - name: "REACT_APP_REDIRECT_URI"
+            value: {{ .Values.app.redirectURL }}
+          - name: "REACT_APP_REPOSITORY_NAME"
+            value: {{ .Values.app.repositoryName }}
+          - name: "REACT_APP_CLIENT_ID"
+            valueFrom:
+              secretKeyRef:
+                key:  clientId
+                name: {{ .Release.Name }}-auth
+                
+---
+apiVersion: v1
+kind: Service                    
+metadata:
+  name: i3dhub-github-app-service   
+  namespace : {{ .Release.namespace }} 
+spec:
+  type: NodePort  
+  ports:                         
+  - name: http
+    port: 80
+    targetPort: app
+    nodePort: {{ .Values.app.nodePort }} 
+  selector:
+    app: i3dhub-github-app
+ {{ end }}

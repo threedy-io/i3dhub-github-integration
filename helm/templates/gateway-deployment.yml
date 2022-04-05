@@ -1,0 +1,37 @@
+---
+apiVersion: apps/v1
+kind: Deployment                 
+metadata:
+  name: i3dhub-github-gateway
+  namespace : {{ .Release.namespace }} 
+spec:
+  replicas: 1 
+  selector:
+    matchLabels:
+      app: i3dhub-github-gateway        
+  template:                      
+    metadata:
+      labels:                    
+        app: i3dhub-github-gateway 
+    spec:                        
+      containers:
+      - name: i3dhub-github-gateway
+        image: i3dhub-github-gateway:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+          - name: data-gw
+            containerPort: 8090
+---
+apiVersion: v1
+kind: Service                    
+metadata:
+  name: i3dhub-github-gateway-service   
+  namespace : {{ .Release.namespace }} 
+spec:
+  ports:                         
+  - name: http
+    port: 8090
+    targetPort: data-gw
+  selector:
+    app: i3dhub-github-gateway
+    

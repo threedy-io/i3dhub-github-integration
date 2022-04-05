@@ -1,0 +1,53 @@
+{{ if .Values.app.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment                 
+metadata:
+  name: i3dhub-github-auth-proxy           
+  namespace : {{ .Release.namespace }} 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: i3dhub-github-auth-proxy        
+  template:                      
+    metadata:
+      labels:                    
+        app: i3dhub-github-auth-proxy 
+    spec:                        
+      containers:
+      - name: i3dhub-github-auth-proxy
+        image: i3dhub-github-auth-proxy:latest
+        imagePullPolicy: IfNotPresent
+        env:          
+          - name: "REACT_APP_CLIENT_ID"
+            valueFrom:
+              secretKeyRef:
+                key:  clientId
+                name: {{ .Release.Name }}-auth
+          - name: "REACT_APP_CLIENT_SECRET"
+            valueFrom:
+              secretKeyRef:
+                key:  clientSecret
+                name: {{ .Release.Name }}-auth
+          - name: "REACT_APP_REDIRECT_URI"
+            value: {{ .Values.app.redirectURL }}
+        ports:
+          - containerPort: 5000
+            name: authenticate    
+---
+apiVersion: v1
+kind: Service                    
+metadata:
+  name: i3dhub-github-auth-proxy-service   
+  namespace : {{ .Release.namespace }} 
+spec:
+  type: NodePort                 
+  ports:                        
+  - name: http
+    port: 5000
+    targetPort: authenticate
+    nodePort: {{ .Values.app.authProxy.nodePort }} 
+  selector:
+    app: i3dhub-github-auth-proxy        
+{{ end }}    
