@@ -26,6 +26,6 @@ appVersion: "0.1.0"
 dependencies:
 - name: instant3Dhub
   condition: instant3Dhub.enabled
-  version: 3.6.1
+  version: 3.7.3
   repository: "https://repo.threedy.io/api/v4/projects/2/packages/helm/stable"
  
