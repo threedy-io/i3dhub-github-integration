@@ -79,7 +79,7 @@ The following section explains how to run on Windows using [docker desktop](http
   docker build -t i3dhub-github-auth-proxy oauth-proxy/
   ```
 
-- Use [helm chart](./helm/) to install the components. Note that this chart uses instant3Dhub version 3.6.1. You can change the used version in [chart.yaml](./helm/Chart.yaml).
+- Use [helm chart](./helm/) to install the components. Note that this chart uses instant3Dhub version 3.7.3. You can change the used version in [chart.yaml](./helm/Chart.yaml).
 
 - In case you want to install instant3Dhub with the other components, you need to update the helm depedency based on the contents of Chart.yaml
 
