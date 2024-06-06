@@ -15,7 +15,23 @@ const Repository = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [token, setToken] = useState("");
   const [owner, setOwner] = useState("");
-  
+  const [context, setContext] = useState(undefined);
+
+  const handleLoad = async () => {
+
+    // wait until the context and viewer objects are created
+    const webvisComponent = document.querySelector('webvis-viewer');
+    const context = await webvisComponent.requestContext();
+    setContext(context);
+
+  };
+
+  useEffect(() => {
+
+    window.addEventListener("load", handleLoad);
+
+  }, []);
+
   const getRepos = useCallback(() => {
     const repositoryName = process.env.REACT_APP_REPOSITORY_NAME;
 
@@ -43,7 +59,15 @@ const Repository = () => {
     setToken(state.githubResponse.token);
     setOwner(state.githubResponse.data.login);
     getRepos();
-  }, [state.isAuthenticated, state.githubResponse.data.login, token]);
+
+    // Pass the Authorization token to webvis
+    if (context && token) {
+      context.changeSetting("additionalRequestHeaders", {
+        Authorization: `Bearer ${token}`,
+      });
+    }
+
+  }, [state.isAuthenticated, state.githubResponse.data.login, token, context]);
 
   const displayRepos = useCallback(() => {
     return repos.map((repo, index) => (
@@ -65,13 +89,13 @@ const Repository = () => {
             File List From Repository {process.env.REACT_APP_REPOSITORY_NAME} :
           </h4>
           <br></br>
-          {repos && displayRepos()}
+          {repos.length > 0 ? displayRepos() : <div>No data available</div>}
           {repos && <div>{errorMessage}</div>}
         </FileList>
         <VisView>
-          <webvis-tree viewer="viewer"></webvis-tree>
-          <AttachWebvis token={token} />
-          <webvis-viewer></webvis-viewer>
+          <AttachWebvis />
+          <webvis-tree viewer="viewer" ></webvis-tree>
+          <webvis-viewer viewer="viewer" context="default_context"></webvis-viewer>
         </VisView>
       </SplitPane>
     </Wrapper>

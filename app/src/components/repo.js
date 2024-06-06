@@ -9,24 +9,32 @@ import DescriptionIcon from "@material-ui/icons/Description";
  * @param owner : Repository owner
  * @ returns the file name and it's icon
  */
- const Repo = ({ name, owner }) => {
+const Repo = ({ name, owner }) => {
   const [nodeId, setNodeId] = useState(undefined);
 
   const checkboxHandle = useCallback(async (e) => {
     e.preventDefault();
-    if (typeof nodeId === "undefined") {
-      const REPOSITORY_NAME = process.env.REACT_APP_REPOSITORY_NAME;
-      let fileName = name.split(".");
-      // adds the data to the webvis APP
-      const newNodeId = await window.webvis.add({
-        label: fileName[0],
-        dataURI: `urn:github:3d-data:${owner}:${REPOSITORY_NAME}:${fileName[0]}:${fileName[1]}`,
-      });
-      setNodeId(newNodeId);
-      window.webvis.setProperty(newNodeId, "enabled", true);
-    } else {
-      setNodeId(undefined);
-      await window.webvis.remove(nodeId);
+
+    let context = window.webvis.getContext("default_context");
+
+    if (context) {
+
+      if (typeof nodeId === "undefined") {
+
+        const REPOSITORY_NAME = process.env.REACT_APP_REPOSITORY_NAME;
+        let fileName = name.split(".");
+
+        // adds the data to the webvis APP
+        const newNodeId = await context.add({
+          label: fileName[0],
+          dataURI: `urn:github:3d-data:${owner}:${REPOSITORY_NAME}:${fileName[0]}:${fileName[1]}`,
+        });
+        setNodeId(newNodeId);
+        context.setProperty(newNodeId, "enabled", true);
+      } else {
+        setNodeId(undefined);
+        await context.remove(nodeId);
+      }
     }
   }, [nodeId, name, owner]);
 
